@@ -59,6 +59,8 @@ app.delete("/users/:userid", (req, res) => {
   res.send(`DELETE HTTP method on user/${req.params.userId} resource`);
 });
 
+//////////////// MESSAGES /////////////////////////////
+
 app.get("/messages", (req, res) => {
   return res.send(Object.values(messages));
 });

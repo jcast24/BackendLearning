@@ -79,6 +79,10 @@ app.post("/messages", (req, res) => {
   return res.send(message);
 });
 
+app.delete("/messages/:messageId", (req, res) => {
+  res.send(`DELETE message successful`);
+});
+
 app.listen(process.env.PORT, () => {
   console.log(`Example app listening on port ${process.env.PORT}`);
 });

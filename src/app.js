@@ -2,35 +2,12 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import { v4 as uuidv4 } from "uuid";
+import models from "../src/models/models.js";
+
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// users and messages
-let users = {
-  1: {
-    id: "1",
-    username: "John David",
-  },
-  2: {
-    id: "2",
-    username: "Bob Marley",
-  },
-};
-
-let messages = {
-  1: {
-    id: "1",
-    text: "Hello world",
-    userId: "1",
-  },
-  2: {
-    id: "2",
-    text: "my friend!",
-    userId: "2",
-  },
-};
 
 // CORS Middleware
 app.use(cors());
@@ -38,12 +15,12 @@ app.use(cors());
 // Routes
 // All users
 app.get("/users", (req, res) => {
-  return res.send(Object.values(users));
+  return res.send(Object.values(req.context.models.users));
 });
 
 // Single Users
 app.get("/users/:userId", (req, res) => {
-  return res.send(users[req.params.userId]);
+  return res.send(req.context.models.users[req.params.userId]);
 });
 
 app.post("/users", (req, res) => {
@@ -62,11 +39,11 @@ app.delete("/users/:userid", (req, res) => {
 //////////////// MESSAGES /////////////////////////////
 
 app.get("/messages", (req, res) => {
-  return res.send(Object.values(messages));
+  return res.send(Object.values(req.context.models.messages));
 });
 
 app.get("/messages/:messageId", (req, res) => {
-  return res.send(messages[req.params.messageId]);
+  return res.send(req.context.models.messages[req.params.messageId]);
 });
 
 app.post("/messages", (req, res) => {
@@ -74,10 +51,10 @@ app.post("/messages", (req, res) => {
   const message = {
     id,
     text: req.body.text,
-    userId: req.me.id,
+    userId: req.context.me.id,
   };
-
-  messages[id] = message;
+  
+  req.context.models.messages[id] = message;
 
   return res.send(message);
 });
@@ -86,20 +63,23 @@ app.delete("/messages/:messageId", (req, res) => {
   const {
     [req.params.messageId]: message,
     ...otherMessages
-  } = messages;
+  } = req.context.models.messages;
 
-  messages = otherMessages;
+  req.context.models.messages = otherMessages;
   return res.send(message);
 });
 
 // Custom middleware
 app.use((req, res, next) => {
-  req.me = users[1];
+  req.context = {
+    models,
+    me: models.users[1],
+  };
   next();
 });
 
 app.get("/session", (req, res) => {
-  return res.send(users[req.me.id]);
+  return res.send(req.context.models.users[req.context.me.id]);
 })
 
 app.listen(process.env.PORT, () => {

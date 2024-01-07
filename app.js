@@ -74,6 +74,7 @@ app.post("/messages", (req, res) => {
   const message = {
     id,
     text: req.body.text,
+    userId: req.me.id,
   };
 
   messages[id] = message;
@@ -83,6 +84,12 @@ app.post("/messages", (req, res) => {
 
 app.delete("/messages/:messageId", (req, res) => {
   res.send(`DELETE message successful`);
+});
+
+// Custom middleware
+app.use((req, res, next) => {
+  req.me = users[1];
+  next();
 });
 
 app.listen(process.env.PORT, () => {

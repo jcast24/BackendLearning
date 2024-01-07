@@ -8,4 +8,10 @@ Technologies used:
 - NodeJS
 - ExpressJS
 
+# File Structure 
+
+src/app.js
+
+src/models/index.js
+
 

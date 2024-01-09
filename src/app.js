@@ -12,6 +12,20 @@ app.use(express.urlencoded({ extended: true }));
 // CORS Middleware
 app.use(cors());
 
+// Custom middleware
+app.use((req, res, next) => {
+  req.context = {
+    models,
+    me: models.users[1], // authenticated user 
+  };
+  console.log(req.context);
+  next();
+});
+
+app.get("/session", (req, res) => {
+  return res.send(req.context.models.users[req.context.me.id]);
+})
+
 // Routes
 // All users
 app.get("/users", (req, res) => {
@@ -22,21 +36,6 @@ app.get("/users", (req, res) => {
 app.get("/users/:userId", (req, res) => {
   return res.send(req.context.models.users[req.params.userId]);
 });
-
-app.post("/users", (req, res) => {
-  res.send("Received a POST HTTP method");
-});
-
-// Added unique identifiers
-app.put("/users/:userid", (req, res) => {
-  res.send(`PUT HTTP method on user/${req.params.userId} resource`);
-});
-
-app.delete("/users/:userid", (req, res) => {
-  res.send(`DELETE HTTP method on user/${req.params.userId} resource`);
-});
-
-//////////////// MESSAGES /////////////////////////////
 
 app.get("/messages", (req, res) => {
   return res.send(Object.values(req.context.models.messages));
@@ -51,7 +50,7 @@ app.post("/messages", (req, res) => {
   const message = {
     id,
     text: req.body.text,
-    userId: req.context.me.id,
+    userId: req.context.me.id, 
   };
   
   req.context.models.messages[id] = message;
@@ -69,18 +68,6 @@ app.delete("/messages/:messageId", (req, res) => {
   return res.send(message);
 });
 
-// Custom middleware
-app.use((req, res, next) => {
-  req.context = {
-    models,
-    me: models.users[1],
-  };
-  next();
-});
-
-app.get("/session", (req, res) => {
-  return res.send(req.context.models.users[req.context.me.id]);
-})
 
 app.listen(process.env.PORT, () => {
   console.log(`Example app listening on port ${process.env.PORT}`);
